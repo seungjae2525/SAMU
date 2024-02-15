@@ -17,10 +17,10 @@
 #' @import ggplot2
 #' @import RColorBrewer
 #' @import readr
+#' @import ggstance
 #'
 #' @importFrom stats cor glm predict sd
 #' @importFrom gridExtra grid.arrange
 #' @importFrom methods is
-#' @importFrom ggstance position_dodgev
 ## usethis namespace: end
 NULL
