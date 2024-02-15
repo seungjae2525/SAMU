@@ -1,14 +1,38 @@
 Package: SAMU
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Version: 1.0.1
+Title: Sensitivity analysis for effects of multiple exposures in the
+        presence of unmeasured confounding
+Description: R package SAMU is sensitivity analysis package for the conditional and marginal exposure effects to possible unmeasured confounding.
+License: MIT + file LICENSE
+URL: https://sites.google.com/view/lwj221/research/softwares
+Depends: R (>= 4.0.0), stats, methods, gridExtra, ggstance
+Imports: optiSolve, pdp, ggplot2, RColorBrewer, readr
+Suggests: gbm, randomForest
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.0
-URL: https://github.com/seungjae2525/SAMU
-BugReports: https://github.com/seungjae2525/SAMU/issues
+NeedsCompilation: no
+Authors@R: 
+  c(person(given = "Boram",
+           family = "Jeong",
+           role = "aut"),
+    person(given = "Seungjae",
+           family = "Lee",
+           role = c("aut", "cre"),
+           email = "seungjae2525@gmail.com"),
+    person(given = "Shinhee",
+           family = "Ye",
+           role = "aut"),
+    person(given = "Donghwan",
+           family = "Lee",
+           role = "aut"),
+    person(given = "Woojoo",
+           family = "Lee",
+           role = "aut"))
+Author: Boram Jeong [aut, cre],
+    Seungjae Lee [aut, cre],
+    Shinhee Ye [aut],
+    Donghwan Lee [aut],
+    Woojoo Lee [aut]
+Maintainer: Seungjae Lee <seungjae2525@gmail.com>
+Packaged: 2024-02-06 02:26:43 UTC; seung
