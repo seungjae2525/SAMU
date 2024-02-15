@@ -5,10 +5,9 @@
 [![Package version](https://img.shields.io/badge/GitHub-1.0.0-orange.svg)](https://github.com/seungjae2525/SAMU/)
 [![minimal R version](https://img.shields.io/badge/R-v4.0.0+-blue.svg)](https://cran.r-project.org/)
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
-[![R-CMD-check](https://github.com/seungjae2525/SAMU/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/seungjae2525/SAMU/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-# Sensitivity analysis for unmeasured confounding in estimating the difference in restricted mean survival time
+# Sensitivity analysis for effects of multiple exposures in the presence of unmeasured confounding
 
 ## Description
 This is the source code for the `SAMU` package in R. 
@@ -16,7 +15,7 @@ This is the source code for the `SAMU` package in R.
 Given a user-specified sensitivity parameters, the sensitivity range is calculated. See reference for details.
  
 ### Reference
-Jeong B, Lee S, Ye S, Lee D, Lee W (2024): Sensitivity analysis for effects of multiple exposures in the presence of unmeasured confounding \emph{xxx}. DOI: xxx.
+Jeong B, Lee S, Ye S, Lee D, Lee W (2024): Sensitivity analysis for effects of multiple exposures in the presence of unmeasured confounding. submitted.
 
 
 ## Installation
