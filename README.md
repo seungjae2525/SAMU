@@ -1,22 +1,22 @@
-# RMSTSens
+# SAMU
 
 <!-- badges: start -->
 [![Project Status](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active/)
-[![Package version](https://img.shields.io/badge/GitHub-1.0.0-orange.svg)](https://github.com/seungjae2525/RMSTSens/)
+[![Package version](https://img.shields.io/badge/GitHub-1.0.0-orange.svg)](https://github.com/seungjae2525/SAMU/)
 [![minimal R version](https://img.shields.io/badge/R-v4.0.0+-blue.svg)](https://cran.r-project.org/)
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
-[![R-CMD-check](https://github.com/seungjae2525/RMSTSens/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/seungjae2525/RMSTSens/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/seungjae2525/SAMU/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/seungjae2525/SAMU/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 # Sensitivity analysis for unmeasured confounding in estimating the difference in restricted mean survival time
 
 ## Description
-This is the source code for the `RMSTSens` package in R. 
-`RMSTSens` is a package aimed at providing a novel sensitivity analysis method for the RMST difference when unmeasured confounding is suspected.
-Given a user-specified sensitivity parameter, the sensitivity range of the difference in adjusted RMST is calculated with the percentile bootstrap confidence interval for the population sensitivity range. See reference for details.
+This is the source code for the `SAMU` package in R. 
+`SAMU` is a package aimed at providing a novel sensitivity model to investigate the effect of correlated multiple exposures on the continuous health outcomes of interest.
+Given a user-specified sensitivity parameters, the sensitivity range is calculated. See reference for details.
  
 ### Reference
-Not yet published (submitted to journal related to biostatistics).
+Jeong B, Lee S, Ye S, Lee D, Lee W (2024): Sensitivity analysis for effects of multiple exposures in the presence of unmeasured confounding \emph{xxx}. DOI: xxx.
 
 
 ## Installation
@@ -25,9 +25,9 @@ Installation using R package `remotes`:
 
 ```r
 install.packages("remotes") # if devtools not already installed
-remotes::install_github("seungjae2525/RMSTSens")
-library(RMSTSens)
+remotes::install_github("seungjae2525/SAMU")
+library(SAMU)
 ```
 
 ### Bug Reports:
-You can also report bugs on GitHub under [Issues](https://github.com/seungjae2525/RMSTSens/issues/).
+You can also report bugs on GitHub under [Issues](https://github.com/seungjae2525/SAMU/issues/).
