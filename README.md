@@ -5,7 +5,6 @@
 [![Package version](https://img.shields.io/badge/GitHub-1.0.0-orange.svg)](https://github.com/seungjae2525/SAMU/)
 [![minimal R version](https://img.shields.io/badge/R-v4.0.0+-blue.svg)](https://cran.r-project.org/)
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
-[![R-CMD-check](https://github.com/seungjae2525/SAMU/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/seungjae2525/SAMU/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 # Sensitivity analysis for effects of multiple exposures in the presence of unmeasured confounding
