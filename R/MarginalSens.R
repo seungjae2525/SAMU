@@ -5,7 +5,7 @@
 #' @param k The number of measured confounders.
 #' @param p The number of exposures.
 #' @param delta The value of \eqn{\delta}.
-#' @param bound The range of \eqn{(\phi_{1}, \ldots, \phi_{k})} and \eqn{(\rho_{1}, \ldots, \rho_{p})}. The order of inputs is c(\eqn{\phi_{1,min}, \ldots, \phi_{k,min}, } \eqn{\rho_{1,min}, \ldots, \rho_{p,min}, \phi_{1,max}, \ldots, \phi_{k,max}, \rho_{1,max}, \ldots, \rho_{p,max}}). See Examples.
+#' @param bound The range of \eqn{(\phi_{1}, \ldots, \phi_{k})} and \eqn{(\rho_{1}, \ldots, \rho_{p})}. The order of inputs is c(\eqn{\phi_{1,max}, \ldots, \phi_{k,max}, } \eqn{\rho_{1,max}, \ldots, \rho_{p,max}, \phi_{1,min}, \ldots, \phi_{k,min}, \rho_{1,min}, \ldots, \rho_{p,min}}). See Examples.
 #' @param n.col Number of columns to display plot
 #' @param xlim x-axis range
 #' @param ylim y-axis range

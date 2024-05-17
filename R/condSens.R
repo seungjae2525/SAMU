@@ -11,7 +11,7 @@ condSens <- function(...) UseMethod("condSens")
 #' @param model What model was fitted (one of "lm", "randomforest", and "gbm").
 #' @param k The number of measured confounders.
 #' @param p The number of exposures.
-#' @param bound The range of \eqn{(\phi_{1}, \ldots, \phi_{k})} and \eqn{(\rho_{1}, \ldots, \rho_{p})}. The order of inputs is c(\eqn{\phi_{1,min}, \ldots, \phi_{k,min}, } \eqn{\rho_{1,min}, \ldots, \rho_{p,min}, \phi_{1,max}, \ldots, \phi_{k,max}, \rho_{1,max}, \ldots, \rho_{p,max}}). See Examples.
+#' @param bound The range of \eqn{(\phi_{1}, \ldots, \phi_{k})} and \eqn{(\rho_{1}, \ldots, \rho_{p})}. The order of inputs is c(\eqn{\phi_{1,max}, \ldots, \phi_{k,max}, } \eqn{\rho_{1,max}, \ldots, \rho_{p,max}, \phi_{1,min}, \ldots, \phi_{k,min}, \rho_{1,min}, \ldots, \rho_{p,min}}). See Examples.
 #' @param delta.range The range of \eqn{(\delta_{min}, \delta_{max})}. See Examples.
 #' @param delta.diff The increment of the sequence of \eqn{\delta}. Default: 0.1.
 #' @param decimal.p Number of digits after the decimal point of numbers appearing in the result table.
@@ -366,7 +366,11 @@ condSens <- function(data=NULL, outcome=NULL, fitmodel, model="lm",
       stop("The maximum length of 'n.visual.delta' is allowed up to 4. Please enter a vector smaller than or equal to 4.")
     }
 
-    coef <- bs_result[-c(1:k)]
+    if (k == 0) {
+      coef <- bs_result
+    } else {
+      coef <- bs_result[-c(1:k)]
+    }
     label <- c(names(coef), "Joint effect")
 
     jointeffcoef <- sum(coef)

@@ -17,7 +17,6 @@
 #' @import ggplot2
 #' @import RColorBrewer
 #' @import readr
-#' @import ggstance
 #'
 #' @importFrom stats cor glm predict sd
 #' @importFrom gridExtra grid.arrange

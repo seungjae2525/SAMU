@@ -276,7 +276,7 @@ SensPlot <- function(condSens.result, exposure.n=NULL,
         geom_pointrange(data=condSens.result,
                         mapping=aes_string(x='model_output', y='label',
                                            xmin='cond_min', xmax='cond_max', color='delta'),
-                        size=0.4, position=position_dodgev(height=0.7)) +
+                        size=0.4, position=position_dodge(width=0.7)) +
         coord_cartesian(xlim=myxlim) +
         geom_vline(xintercept=0, linetype="solid", size=0.4, colour="black") +
         theme_forest() +
