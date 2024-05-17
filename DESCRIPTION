@@ -6,11 +6,11 @@ Description: R package SAMU is sensitivity analysis package for the conditional 
 License: MIT + file LICENSE
 URL: https://sites.google.com/view/lwj221/research/softwares
 Depends: R (>= 4.0.0), stats, methods, gridExtra
-Imports: optiSolve, pdp, ggplot2, RColorBrewer, readr, ggstance
+Imports: optiSolve, pdp, ggplot2 (>= 3.4.0), RColorBrewer, readr, ggstance
 Suggests: gbm, randomForest
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.0
+RoxygenNote: 7.3.1
 NeedsCompilation: no
 Authors@R: 
   c(person(given = "Boram",

@@ -218,7 +218,14 @@ condSens <- function(data=NULL, outcome=NULL, fitmodel, model="lm",
   })
 
   ## Joint bias
-  forjointmyq3 <- myQ3[,-c(1:k)]
+  if (k < 0) {
+    stop("'k' must be non-negative value.")
+  } else if (k == 0) {
+    forjointmyq3 <- myQ3[,1:p]
+  } else {
+    forjointmyq3 <- myQ3[,-c(1:k)]
+  }
+
   # Max
   mycop_max <- cop(f=linfun(a=rowSums(forjointmyq3), name="Obj.function"),
                    lc=lincon(A=Amat, dir=dir, val=val, name=seq(1, (k+p)*2)),
