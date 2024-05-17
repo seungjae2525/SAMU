@@ -140,7 +140,7 @@ SensPlot <- function(condSens.result, exposure.n=NULL,
       plot.dat$delta <- -plot.dat$delta
       ##
       g <- ggplot(plot.dat) +
-        geom_ribbon(data=plot.dat, mapping=aes_string(x='delta', ymin='cond_min', ymax='cond_max'),
+        geom_ribbon(data=plot.dat, mapping=aes(x=.data$delta, ymin=.data$cond_min, ymax=.data$cond_max),
                     alpha=alpha.range, inherit.aes=F, fill="red") +
         geom_line(aes(x=delta, y=intercept), colour="red", linewidth=h.width) +
         geom_line(aes(x=delta, y=0), colour="black", linewidth=h.width, linetype="dashed", alpha=0.5) +
@@ -157,22 +157,22 @@ SensPlot <- function(condSens.result, exposure.n=NULL,
 
       if (length(unique(sign(y_value1))) != 1 & length(unique(sign(y_value2))) != 1) {
         g <- g +
-          geom_point(aes(x=-xofy0_1, y=0), size=point.size, colour="blue") +
-          geom_label(aes(label=label.zero_1, x=-xofy0_1, y=0), size=label.size, colour="black",
-                     hjust=0, vjust =  "inward", nudge_x=-0.006, nudge_y=0.003)  +
-          geom_point(aes(x=-xofy0_2, y=0), size=point.size, colour="blue") +
-          geom_label(aes(label=label.zero_2, x=-xofy0_2, y=0), size=label.size, colour="black",
-                     hjust=0, vjust =  "inward", nudge_x=-0.006, nudge_y=0.003)
+          annotate("point", x=-xofy0_1, y=0, size=point.size, colour="blue") +
+          annotate("label", label=label.zero_1, x=-xofy0_1 - 0.006, y=0 + 0.003, size=label.size, colour="black",
+                   hjust=0, vjust="inward") +
+          annotate("point", x=-xofy0_2, y=0, size=point.size, colour="blue") +
+          annotate("label", label=label.zero_2, x=-xofy0_2 - 0.006, y=0 + 0.003, size=label.size, colour="black",
+                   hjust=0, vjust="inward")
       } else if (length(unique(sign(y_value1))) != 1) {
         g <- g +
-          geom_point(aes(x=-xofy0_1, y=0), size=point.size, colour="blue") +
-          geom_label(aes(label=label.zero_1, x=-xofy0_1, y=0), size=label.size, colour="black",
-                     hjust=0, vjust =  "inward", nudge_x=-0.006, nudge_y=0.003)
+          annotate("point", x=-xofy0_1, y=0, size=point.size, colour="blue") +
+          annotate("label", label=label.zero_1, x=-xofy0_1 - 0.006, y=0 + 0.003, size=label.size, colour="black",
+                   hjust=0, vjust="inward")
       } else if (length(unique(sign(y_value2))) != 1) {
         g <- g +
-          geom_point(aes(x=-xofy0_2, y=0), size=point.size, colour="blue") +
-          geom_label(aes(label=label.zero_2, x=-xofy0_2, y=0), size=label.size, colour="black",
-                     hjust=0, vjust =  "inward", nudge_x=-0.006, nudge_y=0.003)
+          annotate("point", x=-xofy0_2, y=0, size=point.size, colour="blue") +
+          annotate("label", label=label.zero_2, x=-xofy0_2 - 0.006, y=0 + 0.003, size=label.size, colour="black",
+                   hjust=0, vjust="inward")
       } else {
         g <- g
       }
@@ -180,7 +180,7 @@ SensPlot <- function(condSens.result, exposure.n=NULL,
       xlabel <- plot.dat$delta
       ##
       g <- ggplot(plot.dat) +
-        geom_ribbon(data=plot.dat, mapping=aes_string(x='delta', ymin='cond_min', ymax='cond_max'),
+        geom_ribbon(data=plot.dat, mapping=aes(x=.data$delta, ymin=.data$cond_min, ymax=.data$cond_max),
                     alpha=alpha.range, inherit.aes=F, fill="red") +
         geom_line(aes(x=delta, y=intercept), colour="red", linewidth=h.width) +
         geom_line(aes(x=delta, y=0), colour="black", linewidth=h.width, linetype = "dashed", alpha=0.5) +
@@ -197,22 +197,22 @@ SensPlot <- function(condSens.result, exposure.n=NULL,
 
       if (length(unique(sign(y_value1))) != 1 & length(unique(sign(y_value2))) != 1) {
         g <- g +
-          geom_point(aes(x=xofy0_1, y=0), size=point.size, colour="blue") +
-          geom_label(aes(label=label.zero_1, x=xofy0_1, y=0), size=label.size, colour="black",
-                     hjust=0, vjust =  "inward", nudge_x=-0.006, nudge_y=0.003)  +
-          geom_point(aes(x=xofy0_2, y=0), size=point.size, colour="blue") +
-          geom_label(aes(label=label.zero_2, x=xofy0_2, y=0), size=label.size, colour="black",
-                     hjust=0, vjust =  "inward", nudge_x=-0.006, nudge_y=0.003)
+          annotate("point", x=xofy0_1, y=0, size=point.size, colour="blue") +
+          annotate("label", label=label.zero_1, x=xofy0_1 - 0.006, y=0 + 0.003, size=label.size, colour="black",
+                   hjust=0, vjust="inward") +
+          annotate("point", x=xofy0_2, y=0, size=point.size, colour="blue") +
+          annotate("label", label=label.zero_2, x=xofy0_2 - 0.006, y=0 + 0.003, size=label.size, colour="black",
+                   hjust=0, vjust="inward")
       } else if (length(unique(sign(y_value1))) != 1) {
         g <- g +
-          geom_point(aes(x=xofy0_1, y=0), size=point.size, colour="blue") +
-          geom_label(aes(label=label.zero_1, x=xofy0_1, y=0), size=label.size, colour="black",
-                     hjust=0, vjust =  "inward", nudge_x=-0.006, nudge_y=0.003)
+          annotate("point", x=xofy0_1, y=0, size=point.size, colour="blue") +
+          annotate("label", label=label.zero_1, x=xofy0_1 - 0.006, y=0 + 0.003, size=label.size, colour="black",
+                   hjust=0, vjust="inward")
       } else if (length(unique(sign(y_value2))) != 1) {
         g <- g +
-          geom_point(aes(x=xofy0_2, y=0), size=point.size, colour="blue") +
-          geom_label(aes(label=label.zero_2, x=xofy0_2, y=0), size=label.size, colour="black",
-                     hjust=0, vjust =  "inward", nudge_x=-0.006, nudge_y=0.003)
+          annotate("point", x=xofy0_2, y=0, size=point.size, colour="blue") +
+          annotate("label", label=label.zero_2, x=xofy0_2 - 0.006, y=0 + 0.003, size=label.size, colour="black",
+                   hjust=0, vjust="inward")
       } else {
         g <- g
       }
@@ -274,8 +274,8 @@ SensPlot <- function(condSens.result, exposure.n=NULL,
     suppressWarnings({
       fp <- ggplot(condSens.result) +
         geom_pointrange(data=condSens.result,
-                        mapping=aes_string(x='model_output', y='label',
-                                           xmin='cond_min', xmax='cond_max', color='delta'),
+                        mapping=aes(x=.data$model_output, y=.data$label,
+                                    xmin=.data$cond_min, xmax=.data$cond_max, color=.data$delta),
                         size=0.4, position=position_dodge(width=0.7)) +
         coord_cartesian(xlim=myxlim) +
         geom_vline(xintercept=0, linetype="solid", size=0.4, colour="black") +
