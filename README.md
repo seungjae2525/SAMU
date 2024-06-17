@@ -13,7 +13,7 @@
 ## Description
 This is the source code for the `SAMU` package in R. 
 `SAMU` is a package aimed at providing a novel sensitivity model to investigate the effect of correlated multiple exposures on the continuous health outcomes of interest.
-Given a user-specified sensitivity parameters, the sensitivity range is calculated. See reference for details.
+Given a user-specified sensitivity parameters, the sensitivity interval is calculated. See reference for details.
  
 ### Reference
 Jeong B, Lee S, Ye S, Lee D, Lee W (2024): Sensitivity analysis for effects of multiple exposures in the presence of unmeasured confounding. submitted.
@@ -24,7 +24,7 @@ Jeong B, Lee S, Ye S, Lee D, Lee W (2024): Sensitivity analysis for effects of m
 Installation using R package `remotes`:
 
 ```r
-install.packages("remotes") # if devtools not already installed
+if (!require("remotes", quietly=TRUE)) install.packages("remotes") # if devtools not already installed
 remotes::install_github("seungjae2525/SAMU")
 library(SAMU)
 ```

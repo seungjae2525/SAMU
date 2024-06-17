@@ -99,14 +99,12 @@ data[,names.logtrans] <- log(data[,names.logtrans])
 data_r3 <- data
 data_r3[,-c(1)] <- scale(data_r3[,-c(1)])
 
-# Sensitivity analysis for conditional exposure effect
-## Working model: Linear regression (confounders adjusted model)
 ## Number of confounders
 k <- 11
 ## Number of exposures
 p <- 18
 
-# Sensitivity analysis for marginal exposure effect
+## Sensitivity analysis for marginal exposure effect
 ## Working model: Random forest (confounders adjusted model)
 ## 10-fold cross-validation for tuning parameter (mtry)
 set.seed(231111)
@@ -122,7 +120,7 @@ rf_gridsearch <- train(TELOMEAN~., data=data_r3, method="rf",
 mtry <- as.numeric(rf_gridsearch$bestTune)
 rfmodel <- randomForest(TELOMEAN~., data=data_r3, mtry=mtry)
 
-### PDP-based sensitivity analysis results for marginal exposure effect
+#### PDP-based sensitivity analysis results for marginal exposure effect
 ### Supplementary Figure 22
 ## L-U is uncorrelated, and X-U correlated with ranges of (0.18, 0.95).
 mrst1 <- MarginalSens(data_r3, rfmodel, k=k, p=p, delta=-0.02,

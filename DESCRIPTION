@@ -1,7 +1,6 @@
 Package: SAMU
 Version: 1.0.3
-Title: Sensitivity analysis for effects of multiple exposures in the
-        presence of unmeasured confounding
+Title: Sensitivity analysis for effects of multiple exposures in the presence of unmeasured confounding
 Description: R package SAMU is sensitivity analysis package for the conditional and marginal exposure effects to possible unmeasured confounding.
 License: MIT + file LICENSE
 URL: https://sites.google.com/view/lwj221/research/softwares
