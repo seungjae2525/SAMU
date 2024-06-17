@@ -3,6 +3,8 @@
 export(MarginalSens)
 export(SensPlot)
 export(condSens)
+export(condSens.alt)
+import(MASS)
 import(RColorBrewer)
 import(ggplot2)
 import(optiSolve)

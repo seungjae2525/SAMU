@@ -17,11 +17,11 @@ condSens(
   decimal.p = 3,
   report.result = TRUE,
   only.sig = TRUE,
-  n.visual.delta = 4
+  n.visual.delta = 3
 )
 }
 \arguments{
-\item{data}{A data frame in which contains outcome, measured confounders, exposures. The order of variables (outcome, measured confounders, exposures) that make up the data is important.}
+\item{data}{A data frame in which contains outcome, measured confounders, exposures. The order of variables (outcome, measured confounders, exposures) that make up the data is important. See Examples.}
 
 \item{outcome}{The name of variable for outcome.}
 
@@ -33,7 +33,7 @@ condSens(
 
 \item{p}{The number of exposures.}
 
-\item{bound}{The range of \eqn{(\phi_{1}, \ldots, \phi_{k})} and \eqn{(\rho_{1}, \ldots, \rho_{p})}. The order of inputs is c(\eqn{\phi_{1,max}, \ldots, \phi_{k,max}, } \eqn{\rho_{1,max}, \ldots, \rho_{p,max}, \phi_{1,min}, \ldots, \phi_{k,min}, \rho_{1,min}, \ldots, \rho_{p,min}}). See Examples.}
+\item{bound}{The range of \eqn{(\phi_{1}, \ldots, \phi_{k})} and \eqn{(\rho_{1}, \ldots, \rho_{p})}. The order of inputs is (\eqn{\phi_{1,max}, \ldots, } \eqn{ \phi_{k,max},\rho_{1,max}, \ldots, \rho_{p,max}, \phi_{1,min}, \ldots, \phi_{k,min}, \rho_{1,min}, \ldots, \rho_{p,min}}). See Examples.}
 
 \item{delta.range}{The range of \eqn{(\delta_{min}, \delta_{max})}. See Examples.}
 
@@ -43,33 +43,41 @@ condSens(
 
 \item{report.result}{Whether to output the result table. Default: TRUE.}
 
-\item{only.sig}{Whether to output results only for significant variables. Default: TRUE.}
+\item{only.sig}{Whether to output results only for significant exposure(s). Default: TRUE.}
 
-\item{n.visual.delta}{The Number of \eqn{\delta} in the plot to be printed. This is only used when only.sig=FALSE. Default: 4.}
+\item{n.visual.delta}{The number of \eqn{\delta} in the plot to be printed. This is only used when \code{only.sig=FALSE}. Default: 3.}
 }
 \value{
-An object of class \code{condSens}. The object is a data.frame with the following components: 1. only.sig=FALSE
-\item{label}{Exposures}
-\item{model_output}{The coefficients of exposures}
-\item{cond_min}{The minimum of conditional single- and joint-exposure effect}
-\item{cond_max}{The maximum of conditional single- and joint-exposure effect}
-\item{delta}{The values of \eqn{\delta}}
-\item{joint}{Whether the value is a conditional joint-exposure effect}
-\item{bs}{The coefficient of significant exposure}
-\item{bias_min}{Minimum value of bias}
-\item{bias_max}{Maximum value of bias}
-\item{delta}{The values of \eqn{\delta}}
-\item{cond_min}{The minimum of conditional single-exposure effect}
-\item{cond_max}{The maximum of conditional single-exposure effect}
+The object is a data.frame with the following components:
+\itemize{
+\item When \code{only.sig=FALSE}:
+\itemize{
+\item \code{label}: Exposures
+\item \code{model_output}: The coefficients of exposures
+\item \code{cond_min}: The minimum of conditional single- and joint-exposure effect
+\item \code{cond_max}: The maximum of conditional single- and joint-exposure effect
+\item \code{delta}: The values of \eqn{\delta}
+\item \code{joint}: Whether the value is a conditional joint-exposure effect
+}
+\item When \code{only.sig=TRUE}:
+\itemize{
+\item \code{bs}: The coefficient of significant exposure
+\item \code{bias_min}: Minimum value of bias
+\item \code{bias_max}: Maximum value of bias
+\item \code{delta}: The values of \eqn{\delta}
+\item \code{cond_min}: The minimum of conditional single-exposure effect
+\item \code{cond_max}: The maximum of conditional single-exposure effect
+}
+}
 
-To generate the plot of results for the \code{condSens}, use the \code{\link{SensPlot}} functions.
+To generate the plot of results for the \code{condSens}, use the \code{\link{SensPlot}} function.
 }
 \description{
-\code{condSens()} is the main function of condSens and
-performs the sensitivity analysis for estimating the sensitivity range(s).
+\code{condSens()} is the main function of \code{SAMU} package and
+performs the sensitivity analysis for estimating the sensitivity interval(s) of conditional exposure effect.
 }
 \details{
-See Jeong et al. (2024) for details.
+See Section 2 in Jeong et al. (2024) for details.
 }
 \examples{
 ## Import data in out paper and NA omit
@@ -99,8 +107,14 @@ colnames(data) <- c("TELOMEAN",
                     "Dioxin1","Dioxin2","Dioxin3",
                     "Furan1","Furan2","Furan3","Furan4")
 
-## Change bmi (binary) 0:< 30 1: >=30
+## Change bmi to binary // 0: < 30 1: >= 30
 data$bmi_cat3 <- ifelse(data$bmi_cat3 >= 3, 1, 0)
+
+## Change race to binary // 4 (Non-Hispanic White) vs others
+data$race_cat <- ifelse(data$race_cat == 4, 1, 0)
+
+## Change education to binary // after college (3 and 4) vs before college (1 and 2)
+data$edu_cat <- ifelse(data$edu_cat \%in\% c(3,4), 1, 0)
 
 ## Log transformation of exposures
 names.logtrans <- c("PCB74","PCB99","PCB138","PCB153","PCB170","PCB180",
@@ -124,21 +138,22 @@ p <- 18
 fitmodel <- lm(TELOMEAN ~., data=data_r3)
 
 ## Sensitivity analysis results
-### Figure 6
+### For Figure 6 (a)
 ## L-U is uncorrelated, and X-U is correlated with ranges of (0.18, 95).
 ## 1. All exposures
 rst1 <- condSens(data=data_r3, outcome="TELOMEAN", fitmodel=fitmodel, model="lm",
                  k=k, p=p,
-                 bound=c(rep(0, 11), rep(0.95, 18),
-                         rep(0, 11), rep(0.18, 18)),
+                 bound=c(rep(0, 11), rep(0.95, 18),  # upper bounds
+                         rep(0, 11), rep(0.18, 18)), # lower bounds
                  delta.range=c(-0.03, -0.01), delta.diff=0.01, decimal.p=3,
                  report.result=TRUE, only.sig=FALSE, n.visual.delta=3)
 
+### For Figure 6 (b)
 ## 2. Only significant exposure
 rst1_sig <- condSens(data=data_r3, outcome="TELOMEAN", fitmodel=fitmodel, model="lm",
                      k=k, p=p,
-                     bound=c(rep(0, 11), rep(0.95, 18),
-                             rep(0, 11), rep(0.18, 18)),
+                     bound=c(rep(0, 11), rep(0.95, 18),  # upper bounds
+                             rep(0, 11), rep(0.18, 18)), # lower bounds
                      delta.range=c(-0.03, -0.01), delta.diff=0.01, decimal.p=3,
                      report.result=TRUE, only.sig=TRUE, n.visual.delta=3)
 
@@ -151,4 +166,4 @@ Sensitivity analysis for effects of multiple exposures in the presence of unmeas
 \seealso{
 \code{\link[SAMU]{SensPlot}}
 }
-\keyword{methods}
+\keyword{Methods}

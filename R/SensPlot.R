@@ -1,17 +1,21 @@
 #' @title Plot for sensitivity analysis results of conditional exposure effect
 #'
-#' @param condSens.result Object from condSens.
-#' @param exposure.n The number of exposures.
-#' @param alpha.range A opacity of sensitivity range. Values of \code{alpha.range} range from 0 to 1, with lower values corresponding to more transparent colors. Default: 0.4.
-#' @param alpha.ci A opacity of confidence interval. Values of \code{alpha.ci} range from 0 to 1, with lower values corresponding to more transparent colors. Default: 0.9.
-#' @param ytickdiff Distance between y-axis tick. Default: 0.01.
-#' @param point.size Point size of the the lower and upper bound of the sensitivity range. Default: 1.4.
-#' @param h.width Width of horizon line which represents the effect size. Default: 1.
-#' @param axis.title.size Size of x and y axis title. Default: 15.
-#' @param axis.text.size Size of x and y axis text. Default: 12.
-#' @param label.size label text size. Default: 4.
-#' @param myxlim The minimum and maximum values of x-axis.
-#' @param title Plot title name. Default: "Sensitivity analysis".
+#' @description Plot for sensitivity analysis results of conditional exposure effect.
+#' When \code{only.sig=FALSE} in \code{condSens()} or \code{condSens.alt()}, the resulting plot for all exposures appears.
+#' When \code{only.sig=TRUE} in \code{condSens()} or \code{condSens.alt()}, the resulting plot(s) for only significant exposure(s) appear.
+#'
+#' @param condSens.result Object from \code{condSens()} or \code{condSens.alt()}.
+#' @param title Plot title name. This is only used when \code{only.sig=FALSE} in \code{condSens()} or \code{condSens.alt()}. Default: "Sensitivity analysis".
+#' @param myxlim The minimum and maximum values of x-axis. This is only used when \code{only.sig=FALSE} in \code{condSens()} or \code{condSens.alt()}.
+#' @param exposure.n The variable name(s) of significant exposure(s). This is only used when \code{only.sig=TRUE} in \code{condSens()} or \code{condSens.alt()}. Default: NULL.
+#' @param alpha.range A opacity of sensitivity interval. Values of \code{alpha.range} range from 0 to 1, with lower values corresponding to more transparent colors. This is only used when \code{only.sig=TRUE} in \code{condSens()} or \code{condSens.alt()}. Default: 0.4.
+#' @param alpha.ci A opacity of confidence interval. Values of \code{alpha.ci} range from 0 to 1, with lower values corresponding to more transparent colors. This is only used when \code{only.sig=TRUE} in \code{condSens()} or \code{condSens.alt()}. Default: 0.9.
+#' @param ytickdiff Distance between y-axis tick. This is only used when \code{only.sig=TRUE} in \code{condSens()} or \code{condSens.alt()}. Default: 0.01.
+#' @param point.size Point size of the the lower and upper bound of the sensitivity interval. This is only used when \code{only.sig=TRUE} in \code{condSens()} or \code{condSens.alt()}. Default: 1.4.
+#' @param h.width Width of horizon line which represents the effect size. This is only used when \code{only.sig=TRUE} in \code{condSens()} or \code{condSens.alt()}. Default: 1.
+#' @param axis.title.size Size of x and y axis title. This is only used when \code{only.sig=TRUE} in \code{condSens()} or \code{condSens.alt()}. Default: 15.
+#' @param axis.text.size Size of x and y axis text. This is only used when \code{only.sig=TRUE} in \code{condSens()} or \code{condSens.alt()}. Default: 12.
+#' @param label.size label text size. This is only used when \code{only.sig=TRUE} in \code{condSens()} or \code{condSens.alt()}. Default: 4.
 #'
 #' @examples
 #' ## Import data in out paper and NA omit
@@ -41,8 +45,14 @@
 #'                     "Dioxin1","Dioxin2","Dioxin3",
 #'                     "Furan1","Furan2","Furan3","Furan4")
 #'
-#' ## Change bmi (binary) 0:< 30 1: >=30
+#' ## Change bmi to binary // 0: < 30 1: >= 30
 #' data$bmi_cat3 <- ifelse(data$bmi_cat3 >= 3, 1, 0)
+#'
+#' ## Change race to binary // 4 (Non-Hispanic White) vs others
+#' data$race_cat <- ifelse(data$race_cat == 4, 1, 0)
+#'
+#' ## Change education to binary // after college (3 and 4) vs before college (1 and 2)
+#' data$edu_cat <- ifelse(data$edu_cat %in% c(3,4), 1, 0)
 #'
 #' ## Log transformation of exposures
 #' names.logtrans <- c("PCB74","PCB99","PCB138","PCB153","PCB170","PCB180",
@@ -66,23 +76,24 @@
 #' fitmodel <- lm(TELOMEAN ~., data=data_r3)
 #'
 #' ## Sensitivity analysis results
-#' ### Figure 6
+#' ### For Figure 6 (a)
 #' ## L-U is uncorrelated, and X-U is correlated with ranges of (0.18, 95).
 #' ## 1. All exposures
 #' rst1 <- condSens(data=data_r3, outcome="TELOMEAN", fitmodel=fitmodel, model="lm",
 #'                  k=k, p=p,
-#'                  bound=c(rep(0, 11), rep(0.95, 18),
-#'                          rep(0, 11), rep(0.18, 18)),
+#'                  bound=c(rep(0, 11), rep(0.95, 18),  # upper bounds
+#'                          rep(0, 11), rep(0.18, 18)), # lower bounds
 #'                  delta.range=c(-0.03, -0.01), delta.diff=0.01, decimal.p=3,
 #'                  report.result=TRUE, only.sig=FALSE, n.visual.delta=3)
 #' SensPlot(condSens.result=rst1$result, myxlim=c(-0.2, 0.2),
 #'          title="Sensitivity analysis\nCase 1")
 #'
 #' ## 2. Only significant exposure
+#' ### For Figure 6 (b)
 #' rst1_sig <- condSens(data=data_r3, outcome="TELOMEAN", fitmodel=fitmodel, model="lm",
 #'                      k=k, p=p,
-#'                      bound=c(rep(0, 11), rep(0.95, 18),
-#'                              rep(0, 11), rep(0.18, 18)),
+#'                      bound=c(rep(0, 11), rep(0.95, 18),  # upper bounds
+#'                              rep(0, 11), rep(0.18, 18)), # lower bounds
 #'                      delta.range=c(-0.03, -0.01), delta.diff=0.01, decimal.p=3,
 #'                      report.result=TRUE, only.sig=TRUE, n.visual.delta=3)
 #' SensPlot(condSens.result=rst1_sig$result$Furan1, exposure.n="Furan1",
@@ -90,7 +101,7 @@
 #'          axis.title.size=13, axis.text.size=10, label.size=3.5)
 #'
 #' @seealso
-#'  \code{\link[SAMU]{condSens}}
+#'  \code{\link[SAMU]{condSens}} and \code{\link[SAMU]{condSens.alt}}
 #'
 #' @import ggplot2
 #'
@@ -99,16 +110,16 @@
 #' Sensitivity analysis for effects of multiple exposures in the presence of unmeasured confounding
 #' \emph{xxx}. DOI: xxx.
 #'
-#' @keywords methods
+#' @keywords Plot
 #'
 #' @export
-SensPlot <- function(condSens.result, exposure.n=NULL,
-                     alpha.range=0.4, alpha.ci=0.9,
+SensPlot <- function(condSens.result,
+                     title="Sensitivity analysis", myxlim=NULL,
+                     exposure.n=NULL, alpha.range=0.4, alpha.ci=0.9,
                      ytickdiff=0.01, point.size=1.4, h.width=1,
-                     axis.title.size=15, axis.text.size=12, label.size=4,
-                     myxlim, title="Sensitivity analysis"){
-  ##
-  if (colnames(condSens.result)[6] != "joint") {
+                     axis.title.size=15, axis.text.size=12, label.size=4){
+  if (colnames(condSens.result)[6] == "cond_max") {
+    #### For results when only.sig=TRUE ####
     plot.dat <- condSens.result
     delta.range <- c(min(plot.dat$delta), max(plot.dat$delta))
     ## Find touch zero or Not
@@ -143,7 +154,9 @@ SensPlot <- function(condSens.result, exposure.n=NULL,
         geom_ribbon(data=plot.dat, mapping=aes(x=.data$delta, ymin=.data$cond_min, ymax=.data$cond_max),
                     alpha=alpha.range, inherit.aes=F, fill="red") +
         geom_line(aes(x=delta, y=intercept), colour="red", linewidth=h.width) +
-        geom_line(aes(x=delta, y=0), colour="black", linewidth=h.width, linetype="dashed", alpha=0.5) +
+        { if(min(plot.dat$cond_min) < 0 | plot.dat$bs[1] < 0) {
+          geom_line(aes(x=delta, y=0), colour="black", linewidth=h.width, linetype="dashed", alpha=0.5)
+        } } +
         xlab(expression(bold(delta))) + ylab("Effect")  +
         theme_bw() +
         scale_x_continuous(breaks=xlabel, labels=-xlabel, expand=c(0.0015,0.0015)) +
@@ -183,7 +196,9 @@ SensPlot <- function(condSens.result, exposure.n=NULL,
         geom_ribbon(data=plot.dat, mapping=aes(x=.data$delta, ymin=.data$cond_min, ymax=.data$cond_max),
                     alpha=alpha.range, inherit.aes=F, fill="red") +
         geom_line(aes(x=delta, y=intercept), colour="red", linewidth=h.width) +
-        geom_line(aes(x=delta, y=0), colour="black", linewidth=h.width, linetype = "dashed", alpha=0.5) +
+        { if(min(plot.dat$cond_min) < 0 | plot.dat$bs[1] < 0) {
+          geom_line(aes(x=delta, y=0), colour="black", linewidth=h.width, linetype="dashed", alpha=0.5)
+        } } +
         xlab(expression(bold(delta))) + ylab("Effect")  +
         theme_bw() +
         scale_x_continuous(breaks=xlabel, labels=xlabel, expand=c(0.0015,0.0015)) +
@@ -230,8 +245,8 @@ SensPlot <- function(condSens.result, exposure.n=NULL,
 
     return(list(plot=g))
 
-  } else if (ncol(condSens.result) == 6) {
-    ##
+  } else if (colnames(condSens.result)[6] == "joint") {
+    #### For results when only.sig=FALSE #####
     c0upper <- condSens.result$delta[1]
     delta <- unique(condSens.result$delta)
 
@@ -271,6 +286,10 @@ SensPlot <- function(condSens.result, exposure.n=NULL,
 
     condSens.result$label <- factor(condSens.result$label, levels=rev(unique(condSens.result$label)))
 
+    if (is.null(myxlim)) {
+      myxlim <- c(min(condSens.result$cond_min), max(condSens.result$cond_max))
+    }
+
     suppressWarnings({
       fp <- ggplot(condSens.result) +
         geom_pointrange(data=condSens.result,
@@ -291,5 +310,7 @@ SensPlot <- function(condSens.result, exposure.n=NULL,
     suppressWarnings(print(fp))
 
     return(list(plot=fp))
+  } else {
+    stop("'condSens.result' is incorrect!")
   }
 }

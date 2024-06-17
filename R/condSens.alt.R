@@ -1,17 +1,15 @@
-condSens <- function(...) UseMethod("condSens")
-
-#' @title Sensitivity analysis for conditional exposure effects.
+#' @title Sensitivity analysis for conditional exposure effects based on an alternative assumption.
 #'
-#' @description \code{condSens()} is the main function of \code{SAMU} package and
-#' performs the sensitivity analysis for estimating the sensitivity interval(s) of conditional exposure effect.
+#' @description \code{condSens.alt()} is an alternative sensitivity analysis method using assumption for the conditional distribution of U | (L, X) rather than for the joint distribution of (U, L, X).
 #'
 #' @param data A data frame in which contains outcome, measured confounders, exposures. The order of variables (outcome, measured confounders, exposures) that make up the data is important. See Examples.
-#' @param outcome The name of variable for outcome.
+#' @param outcome The name of outcome variable.
 #' @param fitmodel Model output fitted using one of "lm", "randomforest", and "gbm".
 #' @param model What model was fitted (one of "lm", "randomforest", and "gbm").
 #' @param k The number of measured confounders.
 #' @param p The number of exposures.
-#' @param bound The range of \eqn{(\phi_{1}, \ldots, \phi_{k})} and \eqn{(\rho_{1}, \ldots, \rho_{p})}. The order of inputs is (\eqn{\phi_{1,max}, \ldots, } \eqn{ \phi_{k,max},\rho_{1,max}, \ldots, \rho_{p,max}, \phi_{1,min}, \ldots, \phi_{k,min}, \rho_{1,min}, \ldots, \rho_{p,min}}). See Examples.
+#' @param exposure.interest Vector of names for exposures of interest.
+#' @param bound The range of \eqn{(\rho_{1}, \ldots, \rho_{p})}. The order of inputs is (\eqn{\rho_{1,max}, \ldots, \rho_{p,max}, } \eqn{\rho_{1,min}, \ldots, } \eqn{ \rho_{p,min}}). See Examples.
 #' @param delta.range The range of \eqn{(\delta_{min}, \delta_{max})}. See Examples.
 #' @param delta.diff The increment of the sequence of \eqn{\delta}. Default: 0.1.
 #' @param decimal.p Number of digits after the decimal point of numbers appearing in the result table.
@@ -41,87 +39,64 @@ condSens <- function(...) UseMethod("condSens")
 #'   }
 #' }
 #'
-#' To generate the plot of results for the \code{condSens}, use the \code{\link{SensPlot}} function.
+#' To generate the plot of results for the \code{condSens.alt}, use the \code{\link{SensPlot}} function.
 #'
-#' @details See Section 2 in Jeong et al. (2024) for details.
+#' @details See Section 2.4.3 in Jeong et al. (2024) for details.
 #'
 #' @examples
-#' ## Import data in out paper and NA omit
-#' library(readr)
-#' ul="https://raw.githubusercontent.com/lizzyagibson/SHARP.Mixtures.Workshop/master/Data/studypop.csv"
-#' data <- as.data.frame(read_csv(url(ul))); data <- na.omit(data)
+#' # if (!require("MASS", quietly=TRUE)) install.packages("MASS")
+#' library(MASS)
 #'
-#' ## Log transformation for outcome
-#' data$TELOMEAN <- log(data$TELOMEAN)
+#' ## Our simple running example
+#' set.seed(231113)
+#' n.sample <- 10000
+#' delta <- -0.2
+#' rho1 <- 0.1
+#' rho2 <- 0.2
+#' r11 <- 0.6
+#' dat <- as.data.frame(mvrnorm(n=n.sample, c(0, 0, 0),
+#'                              matrix(c(1,rho1,rho2,rho1,1,r11,rho2,r11,1),3,3),
+#'                              empirical=TRUE))
+#' colnames(dat) <- c("U", "X1", "X2")
+#' dat$Y <- 0.5 * dat$X1 + 0.7 * dat$X2 + delta * dat$U + rnorm(n.sample)
 #'
-#' ## Change the order of variables:: 1 outcome - 11 confounders - 18 exposures
-#' data <- data[,c("TELOMEAN",
-#'                 # confounders
-#'                 "bmi_cat3","edu_cat","race_cat","male","ln_lbxcot","age_cent",
-#'                 "LBXWBCSI","LBXLYPCT","LBXMOPCT","LBXEOPCT","LBXBAPCT",
-#'                 # exposures
-#'                 "LBX074LA","LBX099LA","LBX138LA","LBX153LA","LBX170LA","LBX180LA",
-#'                 "LBX187LA","LBX194LA","LBXPCBLA","LBXHXCLA","LBX118LA",
-#'                 "LBXD03LA","LBXD05LA","LBXD07LA",
-#'                 "LBXF03LA","LBXF04LA","LBXF05LA","LBXF08LA"
-#' )]
-#' colnames(data) <- c("TELOMEAN",
-#'                     "bmi_cat3","edu_cat","race_cat","male","ln_lbxcot","age_cent",
-#'                     "LBXWBCSI","LBXLYPCT","LBXMOPCT","LBXEOPCT","LBXBAPCT",
-#'                     "PCB74","PCB99","PCB138","PCB153","PCB170","PCB180",
-#'                     "PCB187","PCB194","PCB126","PCB169","PCB118",
-#'                     "Dioxin1","Dioxin2","Dioxin3",
-#'                     "Furan1","Furan2","Furan3","Furan4")
+#' dat_noU <- dat[,c("Y", "X1", "X2")]
+#' fit.model <- lm(Y ~ X1 + X2, data=dat_noU)
 #'
-#' ## Change bmi to binary // 0: < 30 1: >= 30
-#' data$bmi_cat3 <- ifelse(data$bmi_cat3 >= 3, 1, 0)
+#' rho1_star <- seq(0.05, 0.15, 0.01)
+#' rho2_star <- seq(0.15, 0.25, 0.01)
+#' rho_grid <- expand.grid(rho1_star, rho2_star)
 #'
-#' ## Change race to binary // 4 (Non-Hispanic White) vs others
-#' data$race_cat <- ifelse(data$race_cat == 4, 1, 0)
+#' rho_star_f <- function(i, j){
+#'   t(c(i, j)) %*% solve(matrix(c(1, 0.6, 0.6, 1), 2, 2))
+#' }
+#' rho_star <- t(sapply(1:nrow(rho_grid), function(x) {
+#'   rho_star_f(rho_grid[x,1], rho_grid[x,2])
+#' }))
 #'
-#' ## Change education to binary // after college (3 and 4) vs before college (1 and 2)
-#' data$edu_cat <- ifelse(data$edu_cat %in% c(3,4), 1, 0)
+#' rho1_star_min <- min(rho_star[,1])
+#' rho1_star_max <- max(rho_star[,1])
+#' rho2_star_min <- min(rho_star[,2])
+#' rho2_star_max <- max(rho_star[,2])
 #'
-#' ## Log transformation of exposures
-#' names.logtrans <- c("PCB74","PCB99","PCB138","PCB153","PCB170","PCB180",
-#'                     "PCB187","PCB194","PCB126","PCB169","PCB118",
-#'                     "Dioxin1","Dioxin2","Dioxin3",
-#'                     "Furan1","Furan2","Furan3","Furan4")
-#' data[,names.logtrans] <- log(data[,names.logtrans])
+#' ## All exposures
+#' result.alt <- condSens.alt(data=dat_noU, outcome="Y", fitmodel=fit.model, model="lm",
+#'                            k=0, p=2, exposure.interest=c("X1", "X2"),
+#'                            bound=c(rho1_star_max, rho2_star_max,  # upper bounds
+#'                                    rho1_star_min, rho2_star_min), # lower bounds
+#'                            delta.range=c(-0.3, -0.1), delta.diff=0.1, decimal.p=3,
+#'                            report.result=TRUE, only.sig=FALSE, n.visual.delta=3)
+#' SensPlot(result.alt$result, myxlim=c(0.4, 1.3))
 #'
-#' ## Standardized variables
-#' data_r3 <- data
-#' data_r3[,-c(1)] <- scale(data_r3[,-c(1)])
-#'
-#' # Sensitivity analysis for conditional exposure effect
-#' ## Working model: Linear regression (confounders adjusted model)
-#' ## Number of confounders
-#' k <- 11
-#' ## Number of exposures
-#' p <- 18
-#'
-#' ## Fitting the linear model
-#' fitmodel <- lm(TELOMEAN ~., data=data_r3)
-#'
-#' ## Sensitivity analysis results
-#' ### For Figure 6 (a)
-#' ## L-U is uncorrelated, and X-U is correlated with ranges of (0.18, 95).
-#' ## 1. All exposures
-#' rst1 <- condSens(data=data_r3, outcome="TELOMEAN", fitmodel=fitmodel, model="lm",
-#'                  k=k, p=p,
-#'                  bound=c(rep(0, 11), rep(0.95, 18),  # upper bounds
-#'                          rep(0, 11), rep(0.18, 18)), # lower bounds
-#'                  delta.range=c(-0.03, -0.01), delta.diff=0.01, decimal.p=3,
-#'                  report.result=TRUE, only.sig=FALSE, n.visual.delta=3)
-#'
-#' ### For Figure 6 (b)
-#' ## 2. Only significant exposure
-#' rst1_sig <- condSens(data=data_r3, outcome="TELOMEAN", fitmodel=fitmodel, model="lm",
-#'                      k=k, p=p,
-#'                      bound=c(rep(0, 11), rep(0.95, 18),  # upper bounds
-#'                              rep(0, 11), rep(0.18, 18)), # lower bounds
-#'                      delta.range=c(-0.03, -0.01), delta.diff=0.01, decimal.p=3,
-#'                      report.result=TRUE, only.sig=TRUE, n.visual.delta=3)
+#' ## Only significant exposures
+#' result.alt.sig <- condSens.alt(data=dat_noU, outcome="Y", fitmodel=fit.model, model="lm",
+#'                                k=0, p=2, exposure.interest=c("X1", "X2"),
+#'                                bound=c(rho1_star_max, rho2_star_max,  # upper bounds
+#'                                        rho1_star_min, rho2_star_min), # lower bounds
+#'                                delta.range=c(-0.3, -0.1), delta.diff=0.1, decimal.p=3,
+#'                                report.result=TRUE, only.sig=TRUE, n.visual.delta=3)
+#' SensPlot(result.alt.sig$result$X1)
+#' SensPlot(result.alt.sig$result$X2)
 #'
 #' @seealso
 #'  \code{\link[SAMU]{SensPlot}}
@@ -134,13 +109,35 @@ condSens <- function(...) UseMethod("condSens")
 #' @keywords Methods
 #'
 #' @export
-condSens <- function(data=NULL, outcome=NULL, fitmodel, model="lm",
-                     k, p, bound,
-                     delta.range, delta.diff=0.1, decimal.p=3,
-                     report.result=TRUE, only.sig=TRUE, n.visual.delta=3){
+condSens.alt <- function(data=NULL, outcome=NULL, fitmodel, model="lm",
+                         k, p, exposure.interest, bound,
+                         delta.range, delta.diff=0.1, decimal.p=3,
+                         report.result=TRUE, only.sig=TRUE, n.visual.delta=3){
   ##############################################################################
   if(!(model %in% c("lm", "randomforest", "gbm"))){
     stop("For other models except for 'lm', 'randomforest', and 'gbm', condSens() is currently undergoing development.")
+  }
+
+  if (is.null(data) | is.null(outcome) | is.null(k) | is.null(p)) {
+    stop("'data', 'outcome', 'k', and 'p' must be specified.")
+  }
+
+  length_e <- length(exposure.interest)
+  length_bound <- length(bound)
+
+  if (p != length_e) {
+    stop("The input of 'p' or 'bound' is incorrect. See Examples for how to input 'p' or 'bound'.")
+  }
+
+  if (length_e != length_bound/2) {
+    warning("The sensitivity intervals of the conditional joint-exposure effect is not the sensitivity intervals of effect when all exposures increase by one unit, but the sensitivity intervals of effect when exposures of interest increase by one unit.")
+  }
+
+  upper_bound <- bound[1:length_e]
+  lower_bound <- bound[(length_e+1):length_bound]
+
+  if (sum(lower_bound > upper_bound) >= 1) {
+    stop("Some 'lower_bound' values are larger than 'upper_bound' values. Please check again.")
   }
 
   ##############################################################################
@@ -153,8 +150,9 @@ condSens <- function(data=NULL, outcome=NULL, fitmodel, model="lm",
     stop("Data for confounders and exposures must be scaled with mean 0 and variance 1!")
   }
 
-  ## calculate correlation matrix
-  corrmatrix <- cor(data[,-1])
+  if (identical(intersect(colnames(dataX), exposure.interest), exposure.interest) == FALSE) {
+    stop("Some of 'exposure.interest' is specified incorrectly!")
+  }
 
   ##############################################################################
   if (model == "lm") {
@@ -168,9 +166,6 @@ condSens <- function(data=NULL, outcome=NULL, fitmodel, model="lm",
   } else if (model == "randomforest") {
     if (sum(is(fitmodel)[2] %in% "randomForest") == 0) {
       stop("'model' is not random forest.")
-    }
-    if (is.null(data) | is.null(outcome) | is.null(k) | is.null(p)) {
-      stop("'data', 'outcome', 'k', and 'p' must be specified for 'random forest' or 'gbm'.")
     }
 
     ## Make prediction (Orig)
@@ -193,9 +188,6 @@ condSens <- function(data=NULL, outcome=NULL, fitmodel, model="lm",
     if (sum(is(fitmodel) %in% "gbm") == 0) {
       stop("'model' is not generalized boosted model.")
     }
-    if (is.null(data) | is.null(outcome) | is.null(k) | is.null(p)) {
-      stop("'data', 'outcome', 'k', and 'p' must be specified for 'random forest' or 'gbm'.")
-    }
 
     ## Make prediction (Orig)
     prediction <- mean(predict(fitmodel, data, n.trees=fitmodel$n.trees))
@@ -215,75 +207,42 @@ condSens <- function(data=NULL, outcome=NULL, fitmodel, model="lm",
 
   }
 
-  bs_result <- bs
-
-  ##############################################################################
-  ##
-  invcor <- as.matrix(solve(corrmatrix)) # inverse
-  val <- bound
-  dir <- c(rep("<=", (k+p)), rep(">=", (k+p)))
-  Amat <- as.matrix(rbind(diag(1,(k+p)), diag(1,(k+p))))
-
-  myQ3 <- invcor
-
-  ##
-  singlebias <- apply(invcor, 1, function(x) {
-    biascal_new(invcor=x, Amat=Amat, dir=dir, val=val, k=k, p=p, Q=myQ3)
-  })
-
-  ## Joint bias
-  if (k < 0) {
-    stop("'k' must be non-negative value.")
-  } else if (k == 0) {
-    forjointmyq3 <- myQ3[,1:p]
+  ## Only results for exposure
+  if (k==0) {
+    bs_result <- bs
   } else {
-    forjointmyq3 <- myQ3[,-c(1:k)]
+    bs_result <- bs[-c(1:k)]
   }
 
-  # Max
-  mycop_max <- cop(f=linfun(a=rowSums(forjointmyq3), name="Obj.function"),
-                   lc=lincon(A=Amat, dir=dir, val=val, name=seq(1, (k+p)*2)),
-                   qc=quadcon(Q=myQ3, d=0, dir="<=", val=1, use=TRUE),
-                   max=TRUE)
-  # Min
-  mycop_min <- cop(f=linfun(a=rowSums(forjointmyq3), name="Obj.function"),
-                   lc=lincon(A=Amat, dir=dir, val=val, name=seq(1, (k+p)*2)),
-                   qc=quadcon(Q=myQ3, d=0, dir="<=", val=1, use=TRUE),
-                   max=FALSE)
+  ##############################################################################
+  resultdf <- matrix(c(lower_bound, sum(lower_bound), upper_bound, sum(upper_bound)),
+                     nrow=length_e+1, ncol=2, byrow=FALSE)
 
-  res_max <- solvecop(op=mycop_max, solver="alabama", quiet=TRUE)
-  res_min <- solvecop(op=mycop_min, solver="alabama", quiet=TRUE)
-  maxbias <- validate(op=mycop_max, sol=res_max, quiet=TRUE)$obj.fun
-  minbias <- validate(op=mycop_min, sol=res_min, quiet=TRUE)$obj.fun
-
-  Joint <- c(minbias, maxbias)
-
-  resultdf <- as.data.frame(t(cbind(singlebias, Joint)))
+  rownames(resultdf) <- c(exposure.interest, "Joint")
 
   ##############################################################################
   if (only.sig == TRUE) {
     ##
     if ((sum(is(fitmodel) %in% "lm") == 0)) {
-      stop("If 'only.sig == TRUE', then model must be 'lm'.")
+      stop("If 'only.sig == TRUE', then 'model' must be 'lm'.")
     }
 
     ##
     resultdf <- resultdf[rownames(resultdf) != "Joint", ] # remove joint effect
     new_dat <- data.frame(bs=bs_result, resultdf); colnames(new_dat) <- c("bs", "bias.min", "bias.max")
 
-    ## Only results for exposure
+    ## Only significant exposure
     if (k==0) {
-      new_dat <- new_dat
-      # Only significant exposure
       is.sig <- (summary(fitmodel)$coefficients[,4] < 0.05)[-c(1)]
     } else {
-      new_dat <- new_dat[-c(1:k),]
-      # Only significant exposure
       is.sig <- (summary(fitmodel)$coefficients[,4] < 0.05)[-c(1:(1+k))]
     }
-
-    ## Only significant exposure
     sig.exposure <- names(is.sig)[is.sig]
+
+    if (sum(exposure.interest %in% sig.exposure) == 0) {
+      stop("'exposure.interest' does not contain any significant exposures.")
+    }
+
     sensresultonly <- new_dat[rownames(new_dat) %in% sig.exposure,]
 
     ## Plot
@@ -383,22 +342,12 @@ condSens <- function(data=NULL, outcome=NULL, fitmodel, model="lm",
       stop("The maximum length of 'n.visual.delta' is allowed up to 4. Please enter a value smaller than or equal to 4.")
     }
 
-    if (k == 0) {
-      coef <- bs_result
-    } else {
-      coef <- bs_result[-c(1:k)]
-    }
+    coef <- bs_result
     label <- c(names(coef), "Joint effect")
 
     jointeffcoef <- sum(coef)
 
-    if (k==0) {
-      resultdf <- resultdf
-    } else {
-      resultdf <- resultdf[-c(1:k),]
-    }
-
-    df.init <- data.frame(cbind(label, resultdf, c(coef, jointeffcoef)))
+    df.init <- data.frame(label, resultdf, c(coef, jointeffcoef))
     colnames(df.init) <- c("label", "bias_low", "bias_upper", "coef")
 
     if (delta.range[2] >= 0) {
@@ -433,7 +382,6 @@ condSens <- function(data=NULL, outcome=NULL, fitmodel, model="lm",
     sensresult$joint <- ifelse(sensresult$label=="Joint effect", 1, 0)
     rownames(sensresult) <- NULL
 
-
     if(report.result == TRUE){
       temp.result <- sensresult
       temp.result[,c(2:4)] <- round(temp.result[,c(2:4)], decimal.p)
@@ -443,3 +391,4 @@ condSens <- function(data=NULL, outcome=NULL, fitmodel, model="lm",
     invisible(list(result=sensresult))
   }
 }
+

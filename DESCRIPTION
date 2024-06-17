@@ -1,12 +1,12 @@
 Package: SAMU
-Version: 1.0.2
+Version: 1.0.3
 Title: Sensitivity analysis for effects of multiple exposures in the
         presence of unmeasured confounding
 Description: R package SAMU is sensitivity analysis package for the conditional and marginal exposure effects to possible unmeasured confounding.
 License: MIT + file LICENSE
 URL: https://sites.google.com/view/lwj221/research/softwares
 Depends: R (>= 4.0.0), stats, methods, gridExtra
-Imports: optiSolve, pdp, ggplot2 (>= 3.4.0), RColorBrewer, readr
+Imports: optiSolve, pdp, ggplot2 (>= 3.4.0), RColorBrewer, readr, MASS
 Suggests: gbm, randomForest
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -35,4 +35,4 @@ Author: Boram Jeong [aut, cre],
     Donghwan Lee [aut],
     Woojoo Lee [aut]
 Maintainer: Seungjae Lee <seungjae2525@gmail.com>
-Packaged: 2024-02-15 11:26:57 UTC; seung
+Packaged: 2024-06-17 08:42:56 UTC; seung

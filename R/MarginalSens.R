@@ -1,17 +1,21 @@
 #' @title Sensitivity analysis for marginal exposure effects.
 #'
-#' @param data A data frame in which contains outcome, measured confounders, exposures. The order of variables (outcome, measured confounders, exposures) that make up the data is important.
+#' @description \code{MarginalSens()} is the function for estimating the sensitivity range(s) of marginal exposure effect.
+#'
+#' @param data A data frame in which contains outcome, measured confounders, exposures. The order of variables (outcome, measured confounders, exposures) that make up the data is important. See Examples.
 #' @param fittedmodel Model output fitted using one of "lm", "randomforest", and "gbm".
 #' @param k The number of measured confounders.
 #' @param p The number of exposures.
 #' @param delta The value of \eqn{\delta}.
-#' @param bound The range of \eqn{(\phi_{1}, \ldots, \phi_{k})} and \eqn{(\rho_{1}, \ldots, \rho_{p})}. The order of inputs is c(\eqn{\phi_{1,max}, \ldots, \phi_{k,max}, } \eqn{\rho_{1,max}, \ldots, \rho_{p,max}, \phi_{1,min}, \ldots, \phi_{k,min}, \rho_{1,min}, \ldots, \rho_{p,min}}). See Examples.
-#' @param n.col Number of columns to display plot
-#' @param xlim x-axis range
-#' @param ylim y-axis range
-#' @param text.which Coordinates to display slopes
-#' @param text.size Size of text displaying slopes
-#' @param line.size Line size of slopes
+#' @param bound The range of \eqn{(\phi_{1}, \ldots, \phi_{k})} and \eqn{(\rho_{1}, \ldots, \rho_{p})}. The order of inputs is (\eqn{\phi_{1,max}, \ldots, } \eqn{ \phi_{k,max},\rho_{1,max}, \ldots, \rho_{p,max}, \phi_{1,min}, \ldots, \phi_{k,min}, \rho_{1,min}, \ldots, \rho_{p,min}}). See Examples.
+#' @param n.col Number of columns to display plot.
+#' @param xlim x-axis range.
+#' @param ylim y-axis range.
+#' @param text.which Coordinates to display slopes.
+#' @param text.size Size of text displaying slopes.
+#' @param line.size Line size of slopes.
+#'
+#' @details See Section 3 in Jeong et al. (2024) for details.
 #'
 #' @examples
 #' \dontrun{
@@ -42,8 +46,14 @@
 #'                     "Dioxin1","Dioxin2","Dioxin3",
 #'                     "Furan1","Furan2","Furan3","Furan4")
 #'
-#' ## Change bmi (binary) 0:< 30 1: >=30
+#' ## Change bmi to binary // 0: < 30 1: >= 30
 #' data$bmi_cat3 <- ifelse(data$bmi_cat3 >= 3, 1, 0)
+#'
+#' ## Change race to binary // 4 (Non-Hispanic White) vs others
+#' data$race_cat <- ifelse(data$race_cat == 4, 1, 0)
+#'
+#' ## Change education to binary // after college (3 and 4) vs before college (1 and 2)
+#' data$edu_cat <- ifelse(data$edu_cat %in% c(3,4), 1, 0)
 #'
 #' ## Log transformation of exposures
 #' names.logtrans <- c("PCB74","PCB99","PCB138","PCB153","PCB170","PCB180",
@@ -83,8 +93,8 @@
 #' ### Supplementary Figure 22
 #' ## L-U is uncorrelated, and X-U correlated with ranges of (0.18, 0.95).
 #' mrst1 <- MarginalSens(data_r3, rfmodel, k=k, p=p, delta=-0.02,
-#'                       bound=c(rep(0, 11), rep(0.95, 18),
-#'                               rep(0, 11), rep(0.18, 18)),
+#'                       bound=c(rep(0, 11), rep(0.95, 18),  # upper bounds
+#'                               rep(0, 11), rep(0.18, 18)), # lower bounds
 #'                       n.col=6, xlim=c(-4, 4), ylim=c(-0.2, 0.2),
 #'                       text.which=c(-1.0, 4), text.size=2, line.size=0.8)
 #' }
@@ -96,7 +106,7 @@
 #' Sensitivity analysis for effects of multiple exposures in the presence of unmeasured confounding
 #' \emph{xxx}. DOI: xxx.
 #'
-#' @keywords methods
+#' @keywords Methods
 #'
 #' @export
 MarginalSens <- function(data, fittedmodel, k, p, delta, bound, n.col, xlim, ylim, text.which, text.size, line.size){
